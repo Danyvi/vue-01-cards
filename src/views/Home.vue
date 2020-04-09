@@ -2,6 +2,7 @@
 <div class="home container">
   <div class="card" v-for="smoothie in smoothies" :key="smoothie.id">
     <div class="card-content">
+      <i class="material-icons delete" @click="deleteSmoothie(smoothie.id)">delete</i>
       <h2 class="indigo-text">{{ smoothie.title }}</h2>
       <ul class="ingredients">
         <li v-for="(ing, index) in smoothie.ingredients" :key="index">
@@ -14,25 +15,42 @@
 </template>
 
 <script>
+import db from '@/firebase/init'
+
 export default {
   name: 'Home',
   data(){
     return {
-      smoothies:[
-        {
-          title: 'Ninja Brew',
-          slug: 'ninja-brew',
-          ingredients: ['bananas','coffee','milk'],
-          id: '1'
-        },
-        {
-          title: 'Morning Mood',
-          slug: 'morning-mood',
-          ingredients: ['mango','lime','juice'],
-          id:'2'
-        }
-      ]
+      smoothies:[]
     }
+  },
+  methods:{
+    deleteSmoothie(id){
+      // console.log(id);
+      // delete doc from firestore database then locally
+       db.collection('smoothies').doc(id)
+        .delete()
+        .then( () => {
+          this.smoothies =  this.smoothies.filter(smoothie => {
+          return smoothie.id != id
+          })
+        })
+    }
+  },
+  created(){
+    // fetch data from firestore
+     db.collection('smoothies')
+      .get()
+      .then( snapshot => {
+        // snapshot is the state of the smoothies collection
+        // at that current point in time 
+        snapshot.forEach( doc => {
+          // console.log(doc.data(), doc.id);
+          let smoothie = doc.data()
+          smoothie.id = doc.id
+          this.smoothies.push(smoothie)
+        }) 
+      })
   }
 }
 </script>
@@ -57,5 +75,14 @@ export default {
 
   .home .ingredients li {
     display: inline-block;
+  }
+
+  .home .delete {
+     position: absolute;
+     top: 4px;
+     right: 4px;
+     cursor: pointer;
+     color: #aaa;
+     font-size: 1.4em;
   }
 </style>
