@@ -7,9 +7,10 @@
         <input type="text" name="title" v-model="title">
       </div>
 
-      <div v-for="(ingredient, index) in ingredients" :key="index">
-        <label for="ingredient">Ingredient</label>
+      <div v-for="(ing, index) in ingredients" :key="index" class="field">
+        <label for="ingredient">Ingredient:</label>
         <input type="text" name="ingredient" v-model="ingredients[index]">
+        <i class="material-icons delete" @click="deleteIng(ing)">delete</i>
       </div>
 
       <div class="field add-ingredient">
@@ -26,6 +27,9 @@
 </template>
 
 <script>
+import db from '@/firebase/init'
+import slugify from "slugify"
+
 export default {
   name: "AddSmoothie",
   data(){
@@ -33,12 +37,43 @@ export default {
       title: null,
       another: null,
       ingredients: [],
-      feedback: null
+      feedback: null,
+      slug: null
     }
   },
   methods: {
     AddSmoothie(){
-      console.log(this.title, this.ingredients);
+      // console.log(this.title, this.ingredients);
+      // check if the user has created a title: title is not null
+      if(this.title){
+        this.feedback = null
+        // create a slug
+        // everytime there is a space it will be replace with -
+        this.slug = slugify(this.title, {
+          replacement: '-',
+          remove: /[$*_+~.()'"!\-:@]/g,
+          lower: true
+        })
+        // add an obj that represent the record/document that we want to upload 
+        // to the smoothie collection
+        // We want to add the fields: 
+        db.collection('smoothies')
+          .add({
+            title: this.title,
+            ingredients: this.ingredients,
+            slug: this.slug
+          })
+          .then(
+            () => {
+              this.$router.push({ name: 'Home' })
+            }
+          )
+          .catch(err => {
+            console.log(err)
+          })
+      } else {
+        this.feedback = "You must enter a Smoothie Title"
+      }
       
     },
     addIng(){
@@ -50,6 +85,11 @@ export default {
       } else {
         this.feedback = 'You must enter a value to add an ingredient'
       }
+    },
+    deleteIng(ing){
+      this.ingredients = this.ingredients.filter( ingredient => {
+        return ingredient != ing
+      })
     }
   }
 }
@@ -69,5 +109,15 @@ export default {
 
  .add-smoothie .field{
    margin: 20px auto;
+   position: relative;
+ }
+
+ .add-smoothie .delete {
+   position: absolute;
+   right: 0;
+   bottom: 16px;
+   color: #aaa;
+   font-size: 1.4em;
+   cursor: pointer;
  }
 </style>
