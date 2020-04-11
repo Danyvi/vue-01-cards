@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import AddSmoothie from '../components/AddSmoothie';
+import EditSmoothie from '../components/EditSmoothie.vue';
 
 Vue.use(VueRouter)
 
@@ -16,6 +17,11 @@ const routes = [
     path: '/add-smoothie',
     name: 'AddSmoothie',
     component: AddSmoothie
+  },
+  {
+    path: '/edit-smoothie/:smoothie_slug',
+    name: 'EditSmoothie',
+    component: EditSmoothie
   }
 ];
 

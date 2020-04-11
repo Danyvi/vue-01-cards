@@ -74,7 +74,6 @@ export default {
       } else {
         this.feedback = "You must enter a Smoothie Title"
       }
-      
     },
     addIng(){
       if(this.another){
